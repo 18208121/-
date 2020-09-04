@@ -5,24 +5,38 @@ import re
 from urllib.parse import quote
 import string
 import csv
-
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+import time
 
 def getHtml(url):
-    s = quote(url, safe=string.printable)
-    page = urllib.request.urlopen(s)
-    html = page.read()
+    driver = webdriver.Chrome()
+    driver.get(url)
+    driver.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+    time.sleep(2)
+    html = driver.page_source
+   # s = quote(url, safe=string.printable)
+    #page = urllib.request.urlopen(s)
+    #html = page.read()
     return html
 
 
 def printmoney(ulist):
-    print(ulist)
+    tplt = "{:^10}\t{:^50}\t{:^10}\t{:^60}\t{:^40}"
+    print(tplt.format("序号","商品名称", "价格", "图片连接","价格连接"))  # 表示格式化输出
+    count = 0;
+    for i in range(len(ulist)):
+        u = ulist[i]
+        count = count + 1
+        print(tplt.format(count,u[0], u[1], u[2],u[3]))
 
 def urlname(name):
-    url = 'https://search.jd.com/Search?keyword='+name+'&wq='+name+'page=1&s=1&click=0'
+    url = ['https://search.jd.com/Search?keyword='+name+'&wq='+name+'page={}&s=1&click=0'.format(
+    i) for i in range(1, 20, 2)]
     return url
 
 
-def Getdata(html,f):
+def Getdata(html,f,ulist):
     #reg = r'(.+?\.jpg)'
     #imgre = re.compile(reg)
     Regrx = re.compile('\\s|\\￥||\\,|\\[||\\]|\\n|</?[^><]+>')
@@ -30,6 +44,7 @@ def Getdata(html,f):
     regrx = re.compile('\\[||\\]|')
     soup = BeautifulSoup(html, "html.parser")
     ans = soup.find_all('div', class_='gl-i-wrap')
+    z = 0
     for data in ans:
         tds = data('em')
         if(str(tds).isspace() == False):
@@ -43,30 +58,30 @@ def Getdata(html,f):
         tds_3 = data.a
         td_2 = tds_3['href']
         f.writerow((tds,td,td_1,td_2))
-
+        ulist.append((tds,td,td_1,td_2))
 def getImg(html):
     reg = r'src="(.+?\.jpg)" data-lazy-img'    #正则表达式，得到图片地址
     imgre = re.compile(reg)     #re.compile() 可以把正则表达式编译成一个正则表达式对象.
-    html = html.decode('utf-8')
+#    html = html.decode('utf-8')
     imglist = re.findall(imgre,html)      #re.findall() 方法读取html 中包含 imgre（正则表达式）的数据
     #把筛选的图片地址通过for循环遍历并保存到本地
     #核心是urllib.request.urlretrieve()方法,直接将远程数据下载到本地，图片通过x依次递增命名
     x = 0
-
     for imgurl in imglist:
         urllib.request.urlretrieve('https:'+imgurl, 'D:\照片\%s.jpg' % x)
         x += 1
     return imglist
 
-def main():
+if __name__ == "__main__":
+    uinfo = []
     print("请输入商品")
     a = input()
     f = open(a+'.csv', 'w', encoding='utf-8-sig')
     csv_writer = csv.writer(f)
     csv_writer.writerow(["标题", "价格", "图片链接","商品链接"])
-    jdurl = urlname(a)
-    html = getHtml(jdurl)
-    getImg(html)
-    Getdata(html,csv_writer)
-
-main()
+    urls = urlname(a)
+    for url in urls:
+        html = getHtml(url)
+        Getdata(html,csv_writer,uinfo)
+        getImg(html)
+    printmoney(uinfo)
