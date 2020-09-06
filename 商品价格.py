@@ -1,12 +1,9 @@
-import requests
 from bs4 import BeautifulSoup
 import urllib.request
 import re
-from urllib.parse import quote
-import string
 import csv
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+import sys
 import time
 
 def getHtml(url):
@@ -32,7 +29,7 @@ def printmoney(ulist):
 
 def urlname(name):
     url = ['https://search.jd.com/Search?keyword='+name+'&wq='+name+'page={}&s=1&click=0'.format(
-    i) for i in range(1, 20, 2)]
+    i) for i in range(1, 2, 2)]
     return url
 
 
@@ -72,16 +69,23 @@ def getImg(html):
         x += 1
     return imglist
 
-if __name__ == "__main__":
+def get(a):
     uinfo = []
-    print("请输入商品")
-    a = input()
-    f = open(a+'.csv', 'w', encoding='utf-8-sig')
+    f = open('E:/python数据/商品/'+a + '.csv', 'w', encoding='utf-8-sig')
     csv_writer = csv.writer(f)
-    csv_writer.writerow(["标题", "价格", "图片链接","商品链接"])
+    csv_writer.writerow(["标题", "价格", "图片链接", "商品链接"])
     urls = urlname(a)
     for url in urls:
         html = getHtml(url)
-        Getdata(html,csv_writer,uinfo)
+        Getdata(html, csv_writer, uinfo)
         getImg(html)
-    printmoney(uinfo)
+    if uinfo:  # 存在值即为真
+        return 1
+    else:  # list_temp是空的
+        return 2
+
+if __name__ == "__main__":
+    a = []
+    for i in range(1, len(sys.argv)):
+        a.append(sys.argv[i])
+    print(get(a[0]))
