@@ -41,7 +41,8 @@ public class Cservlet extends HttpServlet {
         request.setCharacterEncoding("utf-8");
         String a = request.getParameter("a");
         String s = dao.Return(a);
-        request.setAttribute("exerciseList", s);
+        String[] sur = {s,a};
+        request.setAttribute("exerciseList", sur);
         request.getRequestDispatcher("yes.jsp").forward(request, response);
 	}
 

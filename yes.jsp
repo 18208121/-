@@ -10,14 +10,16 @@
 <html>
 <head>
 <meta charset="utf-8">
+<title>商品展示</title>
 <title>Insert title here</title>
 </head>
 <body>
-	<%  String s = String.valueOf(request.getAttribute("exerciseList"));
-		int num = Integer.parseInt(s);
+	 <ul>
+	<%  String[] s = (String[])request.getAttribute("exerciseList");
+		int num = Integer.parseInt(s[0]);
 			 if(num==1){
 				 String encoding="UTF-8";
-				 File f = new File("D:\\测试.txt");
+				 File f = new File("E:\\python数据\\商品\\"+s[1]+".txt");
 				 InputStreamReader read = new InputStreamReader (new FileInputStream(f),encoding);
 				 BufferedReader bf = new BufferedReader(read);
 				 String str;
@@ -25,11 +27,19 @@
 				 {
 				   String[] su=str.split(",");			 
     %>
+             <li>
              <p><%=su[0]%></p>
              <p><%=su[1]%></p>
-             <p><%=su[2]%></p>
+             <div>
+             <a target="_blank" title=<%=su[0] %> href=<%=su[3] %> onclick="searchlog(1, '62541363390','26','2','','flagsClk=2097166');">
+             			<img width="220" height="220" data-img="1" src=<%=su[2]%> data-lazy-img="done" source-data-lazy-img="">	
+             			</a></p>
+             </div>
+             <p>来源<%=su[4] %></p>
+             </li>
              <%}} %>
-             <%if(s==null) { %>
+              </ul>
+             <%if(num==2) { %>
              <%="no"%>
              <%} %>
 </body>
